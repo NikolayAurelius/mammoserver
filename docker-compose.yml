@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+  nginx:
+    build: ./entrypoint
+    ports:
+      - 80:80
+    restart: always
+
+
+  gateway:
+    build: ./gateway
+    command: gunicorn --bind 0.0.0.0:5000 app:app # python manage.py run -h 0.0.0.0
+    volumes:
+      - ./gateway/:/usr/src/app/
+    ports:
+      - 5000:5000
+#    env_file:
+#      - ./.env.dev
