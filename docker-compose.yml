@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 services:
   nginx:
     container_name: nginx
@@ -7,15 +7,22 @@ services:
       - 80:80
     restart: always
 
-
   gateway:
     container_name: gateway
     build: ./gateway
-    command: gunicorn --bind 0.0.0.0:5000 app:app # python manage.py run -h 0.0.0.0
+    command: gunicorn --bind 0.0.0.0:5000 app:app
     volumes:
       - ./gateway/:/usr/src/app/
     ports:
       - 5000:5000
     restart: always
-#    env_file:
-#      - ./.env.dev
+
+  model_executor:
+    container_name: model_executor
+    build: ./model_executor
+    command: gunicorn --bind 0.0.0.0:5001 app:app
+    volumes:
+      - ./model_executor/:/usr/src/app/
+    ports:
+      - 5001:5001
+    restart: always
