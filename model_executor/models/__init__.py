@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..common import conv4d
+from .common import conv4d
 import os
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

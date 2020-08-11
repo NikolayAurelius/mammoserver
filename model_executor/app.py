@@ -1,5 +1,5 @@
 from flask import Flask
-from .models import model_1, model_2, model_3, model_4
+from models import model_1, model_2, model_3, model_4
 
 models = [model_1, model_2, model_3, model_4]
 app = Flask(__name__)
