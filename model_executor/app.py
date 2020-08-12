@@ -30,21 +30,22 @@ def upload_file():
 
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+            return jsonify({'error': True, 'error_type': 'No file part'})
         file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+        # if file.filename == '':
+        #     flash('No selected file')
+        #     return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = f'{file.filename}_{datetime.now().strftime("%d/%m/%Y %H:%M:%S")}'
+            filename = f'{file.filename}_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             result = {'bad': np.random.uniform(), 'stranger': np.random.uniform()}
             for model in models:
                 result[model.name] = np.random.uniform()
             return jsonify({'error': False, 'result': result})
+        else:
+            return jsonify({'error': True})
 
     return f'''
     <!doctype html>
