@@ -1,7 +1,8 @@
-from flask import Flask, request, redirect, flash, url_for
+from flask import Flask, request, redirect, flash, url_for, jsonify
 from models import model_1, model_2, model_3, model_4
 import os
 from datetime import datetime
+import numpy as np
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = f'{WORKDIR}/uploads'
@@ -39,9 +40,12 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = f'{file.filename}_{datetime.now().strftime("%d/%m/%Y %H:%M:%S")}'
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            result = {'bad': np.random.uniform(), 'stranger': np.random.uniform()}
+            for model in models:
+                result[model.name] = np.random.uniform()
+            return jsonify({'error': False, 'result': result})
+
     return f'''
     <!doctype html>
     <title>Upload new File</title>
