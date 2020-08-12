@@ -38,7 +38,8 @@ def upload_file():
         #     flash('No selected file')
         #     return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = f'{file.filename}_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
+            print(file.filename)
+            filename = f'{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.bin'
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             result = {'bad': np.random.uniform(), 'stranger': np.random.uniform()}
             for model in models:
