@@ -14,17 +14,20 @@
  		<span class="navbar-brand mb-0 h1">Some text</span>
 	</nav>
 
-	<p></p>
-
 	<form align = "center" method=post enctype=multipart/form-data>
 		<div class="form-group">
-		<h1  align = "center" class="h3 mb-3 font-weight-normal" > Upload image </h1>
+		<h1  font-size = 20px align = "center" > <big><big> Upload image </big></big> </h1>
+		<br></br>
     	<input type=file name=file value="Choose file to upload">
     	<input class="btn btn-outline-secondary" type=submit value=Upload>
     </form>
 
     {% if status %}
     	<p align= "center"> {{ status }} </p>
+    {% endif %}
+
+    {% if showimg %}
+    	<img align = "center" src="/static/uploads/{{showimg}}" alt="User Image" width="256" height="256">
     {% endif %}
 
 
