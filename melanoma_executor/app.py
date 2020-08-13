@@ -41,7 +41,9 @@ def upload_file():
 
             diagns = runModel(os.path.join(UPLOAD_FOLDER, filename), model)
             result = diagns
-            return jsonify({'error': False, 'result': result})
+            print('--------------------result------------')
+            print(str(result[0][0]))
+            return jsonify({'error': False, 'result': str(result[0][0])})
         else:
             return jsonify({'error': True})
 
