@@ -7,22 +7,12 @@ services:
       - 80:80
     restart: always
 
-  gateway:
-    container_name: gateway
-    build: ./gateway
-    command: gunicorn --bind 0.0.0.0:5000 app:app
-    volumes:
-      - ./gateway/:/usr/src/app/
-    ports:
-      - 5000:5000
-    restart: always
-
-  model_executor:
-    container_name: model_executor
-    build: ./model_executor
+  melanoma_executor:
+    container_name: melanoma_executor
+    build: ./melanoma_executor
     command: gunicorn --bind 0.0.0.0:5001 app:app
     volumes:
-      - ./model_executor/:/usr/src/app/
+      - ./melanoma_executor/:/usr/src/app/
     ports:
       - 5001:5001
     restart: always
