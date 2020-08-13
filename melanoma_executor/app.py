@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, flash, url_for, jsonify
+from flask import Flask, request, redirect, flash, url_for, jsonify, render_template
 from models import model, runModel
 import os
 from datetime import datetime
@@ -21,18 +21,17 @@ def allowed_file(filename):
 
 @app.route('/melanoma', methods=['GET', 'POST'])
 def upload_file():
+
+    status = None
+
     if request.method == 'POST':
 
         # check if the post request has the file part
         if 'file' not in request.files:
-            return jsonify({'error': True, 'error_type': 'No file part'})
+            status = 'Error: No file part'
+            #return jsonify({'error': True, 'error_type': 'No file part'})
 
         file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        # if file.filename == '':
-        #     flash('No selected file')
-        #     return redirect(request.url)
 
         if file and allowed_file(file.filename):
             print(file.filename)
@@ -41,22 +40,13 @@ def upload_file():
 
             diagns = runModel(os.path.join(UPLOAD_FOLDER, filename), model)
             result = diagns
-            print('--------------------result------------')
-            print(str(result[0][0]))
-            return jsonify({'error': False, 'result': str(result[0][0])})
+            status = f'Your result: {str(result[0][0])}'
+            #return jsonify({'error': False, 'result': str(result[0][0])})
         else:
-            return jsonify({'error': True})
+            status = 'Error: may be you tried to download not img file'
 
-    return f'''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+    return render_template('main_page.html', status = status)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug = True)

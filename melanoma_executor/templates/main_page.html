@@ -1,0 +1,33 @@
+<!doctype html>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<title> Main page </title>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-light bg-light">
+ 		<span class="navbar-brand mb-0 h1">Some text</span>
+	</nav>
+
+	<p></p>
+
+	<form align = "center" method=post enctype=multipart/form-data>
+		<div class="form-group">
+		<h1  align = "center" class="h3 mb-3 font-weight-normal" > Upload image </h1>
+    	<input type=file name=file value="Choose file to upload">
+    	<input class="btn btn-outline-secondary" type=submit value=Upload>
+    </form>
+
+    {% if status %}
+    	<p align= "center"> {{ status }} </p>
+    {% endif %}
+
+
+</body>
+</html>
+
