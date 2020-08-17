@@ -45,7 +45,7 @@ def upload_file():
             showimg = filename
             diagns = runModel(os.path.join(UPLOAD_FOLDER, filename), model)
             result = diagns
-            status = f'Your result: {str(int(100 * result[0][0]))}%'
+            status = f'Your result: {str(round(100 * result[0][0]))}%'
         else:
             status = 'File should be .jpg, .jpeg or .png'
 

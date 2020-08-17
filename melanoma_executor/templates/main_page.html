@@ -4,30 +4,44 @@
 <html>
 
 <head>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <style>
+   p.blocktext {
+    margin-left: auto;
+    margin-right: auto;
+    width: 30em
+   }
+    </style>
 	<title> Main page </title>
 </head>
 
 <body>
+    <p align = "center" >This site was created using sources for non commercial use based on the following materials available at the links: </p>
 
-	<nav class="navbar navbar-light bg-light">
- 		<span class="navbar-brand mb-0 h1">Some text</span>
-	</nav>
+    <p class = "blocktext">
+        <a href = "URL">https://www.kaggle.com/amyjang/tensorflow-transfer-learning-melanoma</a>
+        <a href = "URL">https://www.kaggle.com/c/siim-isic-melanoma-classification/data </a>
+    </p>
 
+
+
+    <br></br>
 	<form align = "center" method=post enctype=multipart/form-data>
 		<div class="form-group">
 		<h1  font-size = 20px align = "center" > <big><big> Upload image </big></big> </h1>
-		<br></br>
-    	<input type=file name=file value="Choose file to upload">
-    	<input class="btn btn-outline-secondary" type=submit value=Upload>
+    	<p align= "center"> <input type=file name=file value="Choose file to upload">
+    	<input class="btn btn-outline-secondary" type=submit value=Upload> </p>
     </form>
 
+    <p align= "center"> If the result is more than 15%, you should pay attention. </p>
+
+
     {% if status %}
-    	<p align= "center"> {{ status }} </p>
+    	<h1 align= "center"> {{ status }} </h1>
     {% endif %}
 
     {% if showimg %}
-    	<img align = "center" src="/static/uploads/{{showimg}}" alt="User Image" width="256" height="256">
+    	<p align= "center"> <img src="/static/uploads/{{showimg}}" alt="User Image" width="256" height="256"> </p>
     {% endif %}
 
 
