@@ -1,12 +1,15 @@
 from flask import Flask, request, redirect, flash, url_for, render_template
 from models import model, runModel
+import time
 import os
 from datetime import datetime
 import numpy as np
+from PIL import Image
+import pyheif
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = f'{WORKDIR}/static/uploads'
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'heic'}
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
@@ -39,13 +42,21 @@ def upload_file():
         file = request.files['file']
 
         if file and allowed_file(file.filename):
-            print(file.filename)
-            filename = f'{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.jpg'
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            filename = f'{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
+            if (file.filename.rsplit('.', 1)[1].lower() == 'heic'):
+                status = 'I cant do heic files yet'
+                im = Image.open(file.stream)
+                #im = pyheif.read(file.stream)
+                #im = Image.frombytes(im.mode, im.size, im.data,"raw", im.mode, im.stride)
+            else:
+                im = Image.open(file.stream)
+            im = im.convert('RGB')
+            filename = filename + '.jpg'           
             showimg = filename
-            diagns = runModel(os.path.join(UPLOAD_FOLDER, filename), model)
+            diagns = runModel(im, model)
+            im.save(os.path.join(UPLOAD_FOLDER,filename), "JPEG")
             result = diagns
-            status = f'Your result: {str(round(100 * result[0][0]))}%'
+            status = f'Your result: {str(int(round(100 * result[0][0])))}%'
         else:
             status = 'File should be .jpg, .jpeg or .png'
 
