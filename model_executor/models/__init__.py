@@ -141,7 +141,6 @@ def bad(x):
 
 def stranger(y_pred):
     known_vector = [log_loss([[1.0, 0.0]], y_pred), log_loss([[0.0, 1.0]], y_pred)]
-    print(known_vector, y_pred)
     known_weights = [-0.05717982, -0.06803618]
     known = 0.6073612
     for i in range(len(known_vector)):
