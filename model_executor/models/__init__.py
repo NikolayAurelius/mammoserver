@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .common import conv4d
 import os
+from scipy.stats import tmean, tmin, tmax, tstd
+from sklearn.metrics import log_loss
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
@@ -112,3 +114,36 @@ class ModelSimplest(nn.Module):
 model_4 = ModelSimplest().to(device=device)
 model_4.load_state_dict(torch.load(f'{WORKDIR}/model_simplest1.pt', map_location=torch.device('cpu')))
 model_4.eval()
+
+
+def g(value):
+    if value > 1.0:
+        value = 1.0
+    elif value < -1.0:
+        value = -1.0
+    value = int((value + 1.0) * 500)
+    return value
+
+
+def bad(x):
+    plane_orig = x.view(-1)
+    bad_vector = [tmean(plane_orig, limits=(0.0, 10 ** 6), inclusive=(False, True)),
+                  tmin(plane_orig, lowerlimit=0.0, inclusive=False),
+                  tmax(plane_orig),
+                  tstd(plane_orig, limits=(0.0, 10 ** 6), inclusive=(False, True))]
+    bad_weights = [0.00169841, 0.01075043, -0.00035599, 0.00358488]
+    bad = -2.49578006
+    for i in range(len(bad_vector)):
+        bad += bad_weights[i] * bad_vector[i]
+    bad = g(bad)
+    return bad
+
+
+def stranger(y_pred):
+    known_vector = [log_loss([[1.0, 0.0]], y_pred), log_loss([[0.0, 1.0]], y_pred)]
+    known_weights = [-0.05717982, -0.06803618]
+    known = 0.6073612
+    for i in range(len(known_vector)):
+        known += known_weights[i] * known_vector[i]
+    known = g(known)
+    return known

@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 
 
 # def grad(weights: np.array, t: float, v: float):

@@ -16,3 +16,13 @@ services:
     ports:
       - 5001:5001
     restart: always
+
+  plot_executor:
+    container_name: plot_executor
+    build: ./plot_executor
+    command: gunicorn --bind 0.0.0.0:5002 app:app
+    volumes:
+      - ./plot_executor/:/usr/src/app/
+    ports:
+      - 5002:5002
+    restart: always
