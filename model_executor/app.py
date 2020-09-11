@@ -22,7 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 models = [model_1, model_2, model_3, model_4]
 app = Flask(__name__)
 
-plot_app_url = 'http://0.0.0.0:5002'
+plot_app_url = 'http://167.172.168.155:5002'
 
 
 def allowed_file(filename):
