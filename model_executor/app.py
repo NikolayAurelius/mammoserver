@@ -19,11 +19,10 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-#models = [model_1, model_2, model_3, model_4]
+models = [model_1, model_2, model_3, model_4]
 app = Flask(__name__)
 
-#plot_app_url = 'http://0.0.0.0:5002'
-plot_app_url = 'http://127.0.0.1:5002'
+plot_app_url = 'http://0.0.0.0:5002'
 
 
 def allowed_file(filename):
@@ -94,9 +93,6 @@ def get_plots():
             elif 'imgscolvo' in ans.headers:
                 return jsonify('I am page'), num, {'message':ans.headers['message'], 'imgscolvo': str(len(os.listdir(MYIMGDIR)))}
             return jsonify('I am page'), num, {'message':ans.headers['message']}
-        #file.seek(0)
-        #print(file.readline())
-        #requests.post('http://127.0.0.1:5002/', files = {'file': file}, headers = {'instruction':'getfile'})
     return jsonify('Page to get plots')
 
 if __name__ == '__main__':

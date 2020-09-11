@@ -28,6 +28,7 @@ def download_vizualizations():
 
     return jsonify('I am page for vizualization')
 
-
+import  subprocess
 if __name__ == '__main__':
     app.run(debug = True, port='5002')
+    subprocess.Popen(['python.exe','draw_plots.py'])

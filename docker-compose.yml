@@ -7,12 +7,12 @@ services:
       - 80:80
     restart: always
 
-  melanoma_executor:
-    container_name: melanoma_executor
-    build: ./melanoma_executor
+  model_executor:
+    container_name: model_executor
+    build: ./model_executor
     command: gunicorn --bind 0.0.0.0:5001 app:app
     volumes:
-      - ./melanoma_executor/:/usr/src/app/
+      - ./model_executor/:/usr/src/app/
     ports:
       - 5001:5001
     restart: always
