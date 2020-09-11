@@ -19,10 +19,21 @@ services:
 
   plots_executor:
     container_name: plots_executor
-    build: ./plots_executor
+    build: ./plots_executors
     command: gunicorn --bind 0.0.0.0:5002 app:app
+             python3 drawplots.py
     volumes:
       - ./plots_executor/:/usr/src/app/
     ports:
       - 5002:5002
+    restart: always
+
+  melanoma_executor:
+    container_name: melanoma_executor
+    build: ./melanoma_executor
+    command: gunicorn --bind 0.0.0.0:5000 app:app
+    volumes:
+      - ./melanoma_executor/:/usr/src/app/
+    ports:
+      - 5000:5000
     restart: always
