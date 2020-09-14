@@ -1,11 +1,11 @@
-# version 0.3.0
+# version 0.5.0
 
 import struct
 import numpy as np
 from dahuffman import HuffmanCodec
 
-HEADER_SIZE = 5
-
+HEADER_SIZE = 22
+ACTUAL_HEADER_SIZE = 22
 NUM_OF_CONTACTS = 256
 POS_NUM_OF_CHARS = 3
 POS_ALPHABET = 5
@@ -115,7 +115,7 @@ def cos(x):
     assert isinstance(x, int)
     x += SINE_LOOKUP_TABLE_SIZE // 4
     x = x % SINE_LOOKUP_TABLE_SIZE
-    if x < 0:
+    if (x < 0):
         x += SINE_LOOKUP_TABLE_SIZE
     return sine_lookup_table[x]
 
@@ -226,12 +226,17 @@ def matrix256_to_18x18(matrix):
 
 
 def parse_mammograph_raw_data(data):
-    header = list(struct.unpack('HHB', data[:HEADER_SIZE]))
+    header = list(struct.unpack('11H', data[:ACTUAL_HEADER_SIZE]))
     print("header ", header)
 
-    period = header[0]
-    N_samples = header[2]
+    header_version = header[0]
+    mammo_data_size = header[1]
 
+    period = header[8]
+    freq = header[9]
+    N_samples = header[10]
+
+    print("period: ", period, " freq: ", freq, " N_samples: ", N_samples)
     N_point_samples = N_samples * 256 * 256
 
     _data = data[HEADER_SIZE:HEADER_SIZE + N_point_samples * 2]
@@ -241,10 +246,11 @@ def parse_mammograph_raw_data(data):
     # h for short signed integer
 
     # print (_data)
+    # shape (256*256*N_samples)
     list_of_int = list(struct.unpack('>' + str(N_point_samples) + 'h', _data))
     # list_of_int = list(struct.unpack('>16h', _data))
     # print (list_of_int )
-    frame_sampled_size = 256 * N_samples
+    frame_sampled_size = 4 * 256 * N_samples
     list_of_int_combined_samples = []
     # make samples combined by point measure
     # s1,s1,s1,s1,s2,s2,s2,s2,s3,s3,s3,s3,s4,s4,s4,s4...
@@ -252,49 +258,19 @@ def parse_mammograph_raw_data(data):
     print("length list_of_int ", len(list_of_int))
     # print("list_of_int_combined_samples ", list_of_int_combined_samples)
     # for i in range(int(256*256/4)):
-    for i in range(int(256)):
-        # for i in range(int(1)):
-        # print (list_of_int[i*frame_sampled_size])
-        # print (list_of_int[N_samples*4   +i*frame_sampled_size ])
-        # print (i*frame_sampled_size)
-        # print (N_samples * 4 + i * frame_sampled_size )
-        # lists of samples
-
-        # list_sample_points = [list_of_int[i:i+N_samples] for i in range(0, len(list_of_int), N_samples)]
-
-        # ch1 = list_of_int[0+i*frame_sampled_size : N_samples*4   +i*frame_sampled_size : 4]
-        # ch2 = list_of_int[1+i*frame_sampled_size : N_samples*4+1 +i*frame_sampled_size : 4]
-        # ch3 = list_of_int[2+i*frame_sampled_size : N_samples*4+2 +i*frame_sampled_size : 4]
-        # ch4 = list_of_int[3+i*frame_sampled_size : N_samples*4+3 +i*frame_sampled_size : 4]
-
+    for i in range(int(256 / 4)):
         # print (len (ch1))
+        # shape (256*N_samples),(256*N_samples),(256*N_samples),(256*N_samples)
         ch1 = list_of_int[0 + i * frame_sampled_size: 0 + (i + 1) * frame_sampled_size: 4]
         ch2 = list_of_int[1 + i * frame_sampled_size: 1 + (i + 1) * frame_sampled_size: 4]
         ch3 = list_of_int[2 + i * frame_sampled_size: 2 + (i + 1) * frame_sampled_size: 4]
         ch4 = list_of_int[3 + i * frame_sampled_size: 3 + (i + 1) * frame_sampled_size: 4]
-        # ar = np.array(ch1)
-        # print ("ch1 spared", ar.shape)      
-        # ar = np.array(ch2)
-        # print ("ch2 spared", ar.shape)      
-        # ar = np.array(ch3)
-        # print ("ch3 spared", ar.shape)      
-        # ar = np.array(ch4)
-        # print ("ch4 spared", ar.shape)      
 
+        # shape (256,80),(256,80),(256,80),(256,80)
         ch1 = [ch1[i:i + N_samples] for i in range(0, len(ch1), N_samples)]
         ch2 = [ch2[i:i + N_samples] for i in range(0, len(ch2), N_samples)]
         ch3 = [ch3[i:i + N_samples] for i in range(0, len(ch3), N_samples)]
         ch4 = [ch4[i:i + N_samples] for i in range(0, len(ch4), N_samples)]
-        # print ("------ch combined------")
-        # ar = np.array(ch1)
-        # print ("ch1 combined", ar.shape)
-        # ar = np.array(ch2)
-        # print ("ch2 combined", ar.shape)
-        # ar = np.array(ch3)
-        # print ("ch3 combined", ar.shape)
-        # ar = np.array(ch4)
-        # print ("ch4 combined", ar.shape)
-        # print (ch1)
 
         # print (ar.shape)
         # print (len(ch1), len(ch2), len(ch3), len(ch4))
@@ -302,122 +278,139 @@ def parse_mammograph_raw_data(data):
         # list_of_int_combined_samples.append(ch2)
         # list_of_int_combined_samples.append(ch3)
         # list_of_int_combined_samples.append(ch4)
+        # shape (64,4,256,80)
         list_of_int_combined_samples.append([ch1, ch2, ch3, ch4])
 
-        # ar = np.array([ch1,ch2, ch3, ch4])
-        # print ("ch blya", ar.shape)
-        # ar = np.array(list_of_int_combined_samples)
-        # print ("list blya", ar.shape)
         # print(ch1)
         # print(ch2)
         # print(ch3)
         # print(ch4)
 
-    # print (list_of_int_combined_samples)    
-    # return list_of_int_combined_samples
-    print("length list_of_int_combined_samples ", len(list_of_int_combined_samples))
-    ar = np.array(list_of_int_combined_samples)
-    print(ar.shape)
-    # print(ar)
-    # print("list_of_int_combined_samples ", list_of_int_combined_samples)
-    # adc_frames=[]
-    # adc_frames = [[0]*18 for i in range(18)]
-
+    # print("length list_of_int_combined_samples ", len(list_of_int_combined_samples) )
+    # ar = np.array(list_of_int_combined_samples)
+    # print (ar.shape)
+    # shape (80)
     x = [0 for x in range(N_samples)]
+    # shape (18,18,80)
     dummy_adc_frames = [[x] * 18 for i in range(18)]
+    # shape (18,18,18,18,80)
     adc_frames = [[dummy_adc_frames] * 18 for i in range(18)]
-    ar = np.array(adc_frames)
-    print(ar.shape)
-    # print (adc_frames)
-    # list_of_int_combined_samples is combined by four quadrants
-    # print (list_of_int_combined_samples[1])
-    # print("-------------")  
+
+    # shape (18,18,80)
+    dummy_dac_frames = [[x] * 18 for i in range(18)]
+    # shape (18,18,18,18,80)
+    dac_frames = [[dummy_dac_frames] * 18 for i in range(18)]
+
+    # ar = np.array(adc_frames)
+    # print (ar.shape)
+
     print("------_adc_frame_quadrant-------")
-    for i in range(256):
-        _adc_frame_quadrant = [[], [], [], []]
-        adc_frame_quadrant = [[], [], [], []]
+    _adc_frame_quadrant = [[], [], [], []]
+    adc_frame_quadrant = [[], [], [], []]
+    for i in range(len(list_of_int_combined_samples)):
+        # shape (4,256,80)
         _a = list_of_int_combined_samples[i]
 
+        # shape (256,80)
         _adc_frame_quadrant[0] = _a[0]
         _adc_frame_quadrant[1] = _a[1]
         _adc_frame_quadrant[2] = _a[2]
         _adc_frame_quadrant[3] = _a[3]
-        # print(_adc_frame_quadrant[0])
-        # print("------") 
-        # print(_adc_frame_quadrant[1])
-        # print("------") 
-        # print(_adc_frame_quadrant[2])
-        # print("------") 
-        # print(_adc_frame_quadrant[3])
-        # print("------") 
 
         # location of qudrants
         # 0 3
         # 1 2
+
         for j in range(4):
             x = [0 for x in range(N_samples)]
-            # a = [0,0,0,0,0,0]
-            a = [x, x, x, x, x, x]
+            dummy_dac_frames = [[x] * 18 for i in range(18)]
+            for k in range(256):
+                x = mammo_matrix_table[k][0]
+                y = mammo_matrix_table[k][1]
+                # shape (18,18,80)
+                dummy_dac_frames[x][y] = _adc_frame_quadrant[j][k]
+            # shape (4,64,18,18,80)
+            adc_frame_quadrant[j].append(dummy_dac_frames)
+    ar = np.array(adc_frame_quadrant)
+    print(ar.shape)
+    # print ("len(adc_frame_quadrant[0])", len(adc_frame_quadrant[0]))
+    # print ("len(adc_frame_quadrant[1])", len(adc_frame_quadrant[1]))
+    # print ("len(adc_frame_quadrant[2])", len(adc_frame_quadrant[2]))
+    # print ("len(adc_frame_quadrant[3])", len(adc_frame_quadrant[3]))    
+    # for j in range(4):
+    # adc_frame_quadrant[j]=adc_frame_quadrant[j][0]
 
-            a.extend(_adc_frame_quadrant[j][0:3])
-            adc_frame_quadrant[j].append(a)
+    _adc_frame_quadrant = adc_frame_quadrant
+    adc_frame_quadrant = [[], [], [], []]
 
-            a = [x, x, x, x]
-            a.extend(_adc_frame_quadrant[j][3:8])
-            adc_frame_quadrant[j].append(a)
-            a = [x, x, x]
-            a.extend(_adc_frame_quadrant[j][8:14])
-            adc_frame_quadrant[j].append(a)
-            a = [x, x]
-            a.extend(_adc_frame_quadrant[j][14:21])
-            adc_frame_quadrant[j].append(a)
-            a = [x]
-            a.extend(_adc_frame_quadrant[j][21:29])
-            adc_frame_quadrant[j].append(a)
-            a = [x]
-            a.extend(_adc_frame_quadrant[j][29:37])
-            adc_frame_quadrant[j].append(a)
-            adc_frame_quadrant[j].append((_adc_frame_quadrant[j][37:46]))
-            adc_frame_quadrant[j].append((_adc_frame_quadrant[j][46:55]))
-            adc_frame_quadrant[j].append((_adc_frame_quadrant[j][55:64]))
+    for j in range(4):
+        x = [0 for x in range(N_samples)]
+        # shape (18,18,80)
+        dummy_adc_frames = [[x] * 18 for i in range(18)]
+        du_adc = dummy_adc_frames
+        # a = [0,0,0,0,0,0]
+        a = [du_adc, du_adc, du_adc, du_adc, du_adc, du_adc]
 
-            # print (len(adc_frame_quadrant[j]))
-            # print("--------------------------------------------------------------------")
-            # print(adc_frame_quadrant[j])
+        a.extend(_adc_frame_quadrant[j][0:3])
+        adc_frame_quadrant[j].append(a)
 
-        # rotate matrices
-        adc_frame_quadrant[3] = matrix_rotate_90(adc_frame_quadrant[3])
+        a = [du_adc, du_adc, du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][3:8])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc, du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][8:14])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][14:21])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc]
+        a.extend(_adc_frame_quadrant[j][21:29])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc]
+        a.extend(_adc_frame_quadrant[j][29:37])
+        adc_frame_quadrant[j].append(a)
+        adc_frame_quadrant[j].append((_adc_frame_quadrant[j][37:46]))
+        adc_frame_quadrant[j].append((_adc_frame_quadrant[j][46:55]))
+        adc_frame_quadrant[j].append((_adc_frame_quadrant[j][55:64]))
 
-        adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
-        adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
+        ar = np.array(adc_frame_quadrant[j])
+        # print("adc_frame_quadrant[j] ",adc_frame_quadrant[j])
+        # print("len(adc_frame_quadrant[j]) ",len(adc_frame_quadrant[j]))
+        print(ar.shape)
 
-        adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
-        adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
-        adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+        # print (len(adc_frame_quadrant[j]))
+        # print("--------------------------------------------------------------------")
+        # print(adc_frame_quadrant[j])
 
-        # print(adc_frame_quadrant[1])
-        adc_frame = []
-        # print (adc_frame_quadrant[0],adc_frame_quadrant[3])
+    # rotate matrices
+    adc_frame_quadrant[3] = matrix_rotate_90(adc_frame_quadrant[3])
 
-        # print (np.array(adc_frame_quadrant[0]).shape)
-        # print (np.array(adc_frame_quadrant[3]).shape)
-        adc_frame = two_list_in_one(adc_frame_quadrant[0], adc_frame_quadrant[3])
-        adc_frame.extend(two_list_in_one(adc_frame_quadrant[1], adc_frame_quadrant[2]))
+    adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
+    adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
 
-        # print (len(adc_frame))
-        x = mammo_matrix_table[i][0]
-        y = mammo_matrix_table[i][1]
-        adc_frames[x][y] = adc_frame
+    adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+    adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+    adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
 
-        # print("-------------")  
-        # print(adc_frame)
+    # print(adc_frame_quadrant[1])
+    adc_frame = []
+    # print (adc_frame_quadrant[0],adc_frame_quadrant[3])
 
-    return np.array(adc_frames)
+    # print (np.array(adc_frame_quadrant[0]).shape)
+    # print (np.array(adc_frame_quadrant[3]).shape)
+    adc_frame = two_list_in_one(adc_frame_quadrant[0], adc_frame_quadrant[3])
+    adc_frame.extend(two_list_in_one(adc_frame_quadrant[1], adc_frame_quadrant[2]))
+
+    ar = np.array(adc_frame)
+
+    print(ar.shape)
+
+    return np.array(adc_frame)
     # return adc_frames
 
 
 def parse_uncompressed_mammograph_packets(data):
-    header = list(struct.unpack('HHB', data[:HEADER_SIZE]))
+    header = list(struct.unpack('HHB', data[:ACTUAL_HEADER_SIZE]))
     print("header ", header)
 
     period = header[0]
@@ -435,72 +428,116 @@ def parse_uncompressed_mammograph_packets(data):
     # print (_data)
     list_of_int = list(struct.unpack(str(N_point_samples) + 'h', _data))
 
+    # shape (256*256,80)
     list_sample_points = [list_of_int[i:i + N_samples] for i in range(0, len(list_of_int), N_samples)]
 
     print("list_sample_points", len(list_sample_points))
-    list_frames = [list_sample_points[i:i + 256] for i in range(0, len(list_sample_points), 256)]
-    print("list_frames", len(list_frames))
+    # shape (64,1024,80)
+    list_frames = [list_sample_points[i:i + 1024] for i in range(0, len(list_sample_points), 1024)]
+    print("len list_frames: ", len(list_frames))
     # dummy_sample_point
 
+    # shape (80)
     x = [0 for x in range(N_samples)]
-
+    # shape (18,18,80)
     dummy_adc_frames = [[x] * 18 for i in range(18)]
+    # shape (18,18,18,18,80)
     adc_frames = [[dummy_adc_frames] * 18 for i in range(18)]
+
+    dummy_dac_frames = [[x] * 18 for i in range(18)]
+    dac_frames = [[dummy_dac_frames] * 18 for i in range(18)]
 
     ar = np.array(adc_frames)
     # print (ar.shape)
 
-    for i in range(256):
+    adc_frame_quadrant = [[], [], [], []]
+    for i in range(len(list_frames)):
         _adc_frame_quadrant = [[], [], [], []]
-        adc_frame_quadrant = [[], [], [], []]
 
+        # shape (1024,80)
         list_frame = list_frames[i]
+        # print ("len _adc_frame_quadrant: ", len(_adc_frame_quadrant) )
+        # shape (4,256,80)
         _adc_frame_quadrant[0] = list_frame[0::4]
         _adc_frame_quadrant[1] = list_frame[1::4]
         _adc_frame_quadrant[2] = list_frame[2::4]
         _adc_frame_quadrant[3] = list_frame[3::4]
 
+        # print ("len _adc_frame_quadrant: ", len(_adc_frame_quadrant[0]) )
         for j in range(4):
+            # shape (N_samples)
             x = [0 for x in range(N_samples)]
-            # a = [0,0,0,0,0,0]
-            a = [x, x, x, x, x, x]
-            a.extend(_adc_frame_quadrant[j][0:3])
-            adc_frame_quadrant[j].append(a)
-            a = [x, x, x, x]
-            a.extend(_adc_frame_quadrant[j][3:8])
-            adc_frame_quadrant[j].append(a)
-            a = [x, x, x]
-            a.extend(_adc_frame_quadrant[j][8:14])
-            adc_frame_quadrant[j].append(a)
-            a = [x, x]
-            a.extend(_adc_frame_quadrant[j][14:21])
-            adc_frame_quadrant[j].append(a)
-            a = [x]
-            a.extend(_adc_frame_quadrant[j][21:29])
-            adc_frame_quadrant[j].append(a)
-            a = [x]
-            a.extend(_adc_frame_quadrant[j][29:37])
-            adc_frame_quadrant[j].append(a)
-            adc_frame_quadrant[j].append((_adc_frame_quadrant[j][37:46]))
-            adc_frame_quadrant[j].append((_adc_frame_quadrant[j][46:55]))
-            adc_frame_quadrant[j].append((_adc_frame_quadrant[j][55:64]))
+            # shape (18,18,N_samples)
+            dummy_dac_frames = [[x] * 18 for i in range(18)]
+            for k in range(256):
+                x = mammo_matrix_table[k][0]
+                y = mammo_matrix_table[k][1]
+                dummy_dac_frames[x][y] = _adc_frame_quadrant[j][k]
+            adc_frame_quadrant[j].append(dummy_dac_frames)
+        # print ("len(_adc_frame_quadrant[0])", len(_adc_frame_quadrant[0]))
+        # print ("len(_adc_frame_quadrant[1])", len(_adc_frame_quadrant[1]))
+        # print ("len(_adc_frame_quadrant[2])", len(_adc_frame_quadrant[2]))
+        # print ("len(_adc_frame_quadrant[3])", len(_adc_frame_quadrant[3]))
 
-        adc_frame_quadrant[3] = matrix_rotate_90(adc_frame_quadrant[3])
+    # print ("len(adc_frame_quadrant[0][0])", len(adc_frame_quadrant[0][0]))
+    # print ("len(adc_frame_quadrant[1][0])", len(adc_frame_quadrant[1][0]))
+    # print ("len(adc_frame_quadrant[2][0])", len(adc_frame_quadrant[2][0]))
+    # print ("len(adc_frame_quadrant[3][0])", len(adc_frame_quadrant[3][0]))        
 
-        adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
-        adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
+    _adc_frame_quadrant = adc_frame_quadrant
+    adc_frame_quadrant = [[], [], [], []]
 
-        adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
-        adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
-        adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+    # print ("_adc_frame_quadrant[0]", _adc_frame_quadrant[0])    
+    # print ("len(_adc_frame_quadrant[0])", len(_adc_frame_quadrant[0]))
+    # print ("len(_adc_frame_quadrant[1])", len(_adc_frame_quadrant[1]))
+    # print ("len(_adc_frame_quadrant[2])", len(_adc_frame_quadrant[2]))
+    # print ("len(_adc_frame_quadrant[3])", len(_adc_frame_quadrant[3]))
 
-        adc_frame = []
-        adc_frame = two_list_in_one(adc_frame_quadrant[0], adc_frame_quadrant[3])
-        adc_frame.extend(two_list_in_one(adc_frame_quadrant[1], adc_frame_quadrant[2]))
+    # print(_adc_frame_quadrant[0])
+    for j in range(4):
+        x = [0 for x in range(N_samples)]
+        # shape (18,18,80)
+        dummy_adc_frames = [[x] * 18 for i in range(18)]
+        du_adc = dummy_adc_frames
+        # a = [0,0,0,0,0,0]
+        a = [du_adc, du_adc, du_adc, du_adc, du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][0:3])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc, du_adc, du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][3:8])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc, du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][8:14])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc, du_adc]
+        a.extend(_adc_frame_quadrant[j][14:21])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc]
+        a.extend(_adc_frame_quadrant[j][21:29])
+        adc_frame_quadrant[j].append(a)
+        a = [du_adc]
+        a.extend(_adc_frame_quadrant[j][29:37])
+        adc_frame_quadrant[j].append(a)
+        adc_frame_quadrant[j].append((_adc_frame_quadrant[j][37:46]))
+        adc_frame_quadrant[j].append((_adc_frame_quadrant[j][46:55]))
+        adc_frame_quadrant[j].append((_adc_frame_quadrant[j][55:64]))
 
-        x = mammo_matrix_table[i][0]
-        y = mammo_matrix_table[i][1]
-        adc_frames[x][y] = adc_frame
+    adc_frame_quadrant[3] = matrix_rotate_90(adc_frame_quadrant[3])
+
+    adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
+    adc_frame_quadrant[2] = matrix_rotate_90(adc_frame_quadrant[2])
+
+    adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+    adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+    adc_frame_quadrant[1] = matrix_rotate_90(adc_frame_quadrant[1])
+
+    adc_frames = []
+    adc_frames = two_list_in_one(adc_frame_quadrant[0], adc_frame_quadrant[3])
+    adc_frames.extend(two_list_in_one(adc_frame_quadrant[1], adc_frame_quadrant[2]))
+
+    # x = mammo_matrix_table[i][0]
+    # y = mammo_matrix_table[i][1]
+    # adc_frames[x][y] = adc_frame
 
     return np.array(adc_frames)
 
@@ -546,3 +583,86 @@ def read_from_file_binary(file_name):
     data = file.read()
     file.close()
     return data
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+
+    def mammon_plot(ar):
+        ar = np.sort(ar, axis=4)
+        # print(ar[8, 8, :, :, -1], ar[8, 8, :, :, 0])
+        a = ar[11, 11, :, :, -1] - ar[11, 11, :, :, 0]
+        plt.imshow(a, cmap='hot', interpolation='nearest')
+        plt.show()
+
+        # nulls_by_coord_out = {}
+        # for x_out in range(18):
+        # for y_out in range(18):
+
+        # if mammo_matrix_table2[x_out * 18 + y_out] is None:
+        # continue
+
+        # sub_ar = ar[x_out, y_out]
+        # nulls_by_coord_out[x_out, y_out] = []
+        # for x_in in range(18):
+        # for y_in in range(18):
+        # if mammo_matrix_table2[x_in * 18 + y_in] is None:
+        # continue
+
+        # mx = sub_ar[x_in, y_in][-1]
+        # mn = sub_ar[x_in, y_in][0]
+        # if mx == mn and mx == 0:
+        # nulls_by_coord_out[x_out, y_out].append((x_in, y_in))
+
+        # for key in nulls_by_coord_out.keys():
+        # print(key, len(nulls_by_coord_out[key]), nulls_by_coord_out[key])
+
+
+    # execute only if run as a script
+    print("----------------------------------------()()()()MEGA START()()()()----------------------------------------")
+    print("----------------------------------------()()()()()()()()()()()()()----------------------------------------")
+    print("----------------------------------------()()()()MEGA START()()()()----------------------------------------")
+    print("----------------------------------------()()()()()()()()()()()()()----------------------------------------")
+    print("----------------------------------------()()()()MEGA START()()()()----------------------------------------")
+    print("----------------------------------------()()()()()()()()()()()()()----------------------------------------")
+    print("----------------------------------------()()()()MEGA START()()()()----------------------------------------")
+    # dummy_file_name = "scan_2020_08_06_03_06_16.bin"
+    # dummy_file_name = "scan_2020_08_06_06_46_41.bin"
+    # dummy_file_name = "scan_2020_08_06_08_17_28.bin"
+    # dummy_file_name = "scan_2020_08_06_09_31_09.bin"
+    # dummy_file_name = "scan_2020_08_06_09_44_15.bin"
+
+    dummy_file_name = "dummy_bdata1.bin"
+
+    dummy_file_name = "AAABdCWdcwQBAAAA_1.bin"
+    dummy_file_name = "mammo_matrix.bin"
+
+    dummy_file_name = "AAABdHb2TEsBAAAA_1.bin"
+    data = read_from_file_binary(dummy_file_name)
+
+    ar = parse_mammograph_raw_data(data)
+    mammon_plot(ar)
+    # print (ar.shape)
+    # frames, N_samples, period = parse_compressed_mammograph_packets(data)
+
+    # frame_values = parse_frame(frames[0], N_samples, period)
+
+    # mammo_bin_file_name = "mammo4.bin"
+
+    # data = read_from_file_binary(mammo_bin_file_name)
+
+    # print (ar[0])
+    # print (len(ar))
+
+    # dummy_file_name = "decode_scan.tmp"
+    # # dummy_file_name = "decode_scan_2020_08_13_13_06_44.biz"
+    # data = read_from_file_binary(dummy_file_name)
+    # ar = parse_uncompressed_mammograph_packets(data)
+
+    # print (ar.shape)
+    # print (ar[9])
+    # print (ar[9][9][9][9])
+
+    # print (adc_frames[0][0][0][0])
+    # print (x)

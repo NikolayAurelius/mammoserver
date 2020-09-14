@@ -37,5 +37,5 @@ def max_min_approximate_aplitude(meas):
 def meas_to_x(meas: np.array = np.zeros((18, 18, 18, 18, 80))):
     amplitude = max_min_approximate_aplitude(meas)
     x = np.expand_dims(np.expand_dims(amplitude, axis=0), axis=0)
-    return x
+    return torch.Tensor(x)
 
