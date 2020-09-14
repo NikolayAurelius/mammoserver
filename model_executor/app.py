@@ -58,7 +58,7 @@ def upload_file():
 
             result = {'bad': bad(x)}
             for model in models:
-                result[model.name] = model(x)
+                result[model.name] = int(model(x)[0][1].item() * 1000)
 
             result['stranger'] = stranger(result['torch_model_3'])
             return jsonify({'error': False, 'result': result})
