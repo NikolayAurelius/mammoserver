@@ -19,9 +19,8 @@ services:
 
   plots_executor:
     container_name: plots_executor
-    build: ./plots_executors
+    build: ./plots_executor
     command: gunicorn --bind 0.0.0.0:5002 app:app
-             python3 drawplots.py
     volumes:
       - ./plots_executor/:/usr/src/app/
     ports:

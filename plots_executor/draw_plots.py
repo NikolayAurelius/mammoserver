@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 
 from zipfile import ZipFile
 
+BINSDIR = 'vizualizations/bins'
+
 class MammographMatrix:
     def __init__(self):
         self.matrix = np.zeros((18, 18), dtype=np.int32) - 1
@@ -97,12 +99,12 @@ def draw_plots(fname):
 
 	parser = parse_mammograph_raw_data
 	if (fname[-4:]) == '.bin':
-		data = read_from_file_binary(f'vizualizations/bins/{fname}')
+		data = read_from_file_binary(BINSDIR + f'/{fname}')
 		arr = parser(data)
 		x = meas_to_x(arr)
 		x = x[0][0]
 	elif (fname[-4:]) == '.txt':
-		x = txt_file_to_x(f'vizualizations/bins/{fname}', mammograph_matrix)
+		x = txt_file_to_x(BINSDIR + f'/{fname}', mammograph_matrix)
 
 	#make_my_plot(x, figursize = (20,20), toSave = True, 
    # 	filename = f'vizualizations/images/{fname}/3dplot', euclid_colors = True)
@@ -152,7 +154,7 @@ def draw_plots(fname):
 
 def isnew(list_of_files):
 
-	dif = np.setdiff1d(os.listdir('vizualizations/bins'), list_of_files)
+	dif = np.setdiff1d(os.listdir(BINSDIR), list_of_files)
 	if len(dif) > 0:
 		print('i have new file' + str(dif))
 		for el in dif:

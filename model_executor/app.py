@@ -49,6 +49,7 @@ def upload_file():
             filename = f'{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{extention}'
             path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(path)
+            requests.post(plot_app_url, files={'file': open(path, 'rb')}, headers = {'instruction':'getfile'})
             parser = parse_mammograph_raw_data
 
             # TODO: Из-за того, что утилита сохраняет всё под одним файлом можем работать только с одним воркером
@@ -91,7 +92,7 @@ def get_plots():
                 print('send zip file')
                 return send_file(io.BytesIO(ans.content), mimetype = 'zip'), num, {'message':ans.headers['message']}
             elif 'imgscolvo' in ans.headers:
-                return jsonify('I am page'), num, {'message':ans.headers['message'], 'imgscolvo': str(len(os.listdir(MYIMGDIR)))}
+                return jsonify('I am page'), num, {'message':ans.headers['message'], 'imgscolvo': ans.headers['imgscolvo']}
             return jsonify('I am page'), num, {'message':ans.headers['message']}
     return jsonify('Page to get plots')
 

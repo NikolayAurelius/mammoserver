@@ -15,5 +15,3 @@ RUN pip install -r requirements.txt
 
 # copy project
 COPY . /usr/src/app/
-
-RUN exec python3 draw_plots.py

@@ -8,6 +8,11 @@ app = Flask(__name__)
 BINSDIR = 'vizualizations/bins'
 IMGSDIR = 'vizualizations/images'
 
+@app.route('/draw_plots', methods=['GET', 'POST'])
+def draw_plots():
+	subprocess.Popen(['python3','draw_plots.py'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	return jsonify('Run draw plots')
+
 @app.route('/', methods=['GET', 'POST'])
 def download_vizualizations():
     if request.method == 'POST':
@@ -31,4 +36,3 @@ def download_vizualizations():
 import  subprocess
 if __name__ == '__main__':
     app.run(debug = True, port='5002')
-    subprocess.Popen(['python.exe','draw_plots.py'])
