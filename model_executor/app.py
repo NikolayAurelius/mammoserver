@@ -3,8 +3,8 @@ from models import model_1, model_2, model_3, model_4, bad, stranger
 import os
 from datetime import datetime
 import numpy as np
-from .mammo_packets import read_from_file_binary, parse_mammograph_raw_data, parse_uncompressed_mammograph_packets
-from .amplitude import meas_to_x
+from mammo_packets import read_from_file_binary, parse_mammograph_raw_data, parse_uncompressed_mammograph_packets
+from amplitude import meas_to_x
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = f'{WORKDIR}/uploads'
