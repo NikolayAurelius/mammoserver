@@ -60,7 +60,8 @@ def upload_file():
             for model in models:
                 result[model.name] = int(model(x)[0][1].item() * 1000)
 
-            result['stranger'] = stranger(result['torch_model_3'])
+
+            result['stranger'] = stranger(np.array([[1000 - result['torch_model_3'], result['torch_model_3']]]) / 1000)
             return jsonify({'error': False, 'result': result})
         else:
             return jsonify({'error': True})
