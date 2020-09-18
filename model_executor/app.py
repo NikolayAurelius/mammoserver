@@ -61,10 +61,17 @@ def upload_file():
             for model in models:
                 result[model.name] = int(model(x)[0].item() * 100)
 
-
-
             result['stranger'] = stranger(np.array([[100 - result['torch_model_2'], result['torch_model_2']]]) / 100)
-            result['result'] = f"{result['torch_model_2']}, {result['bad'] >= 50}, {result['stranger'] >= 50}"
+
+            def ans(value, names):
+                if value >= 0.5:
+                    return names[0]
+                else:
+                    return names[1]
+
+            result['result'] = f"{result['torch_model_2']}, " \
+                               f"{ans(result['bad'], ['bad', 'good'])}, " \
+                               f"{ans(result['stranger'], ['new', 'old'])}"
             return jsonify({'error': False, 'result': result})
         else:
             return jsonify({'error': True})
