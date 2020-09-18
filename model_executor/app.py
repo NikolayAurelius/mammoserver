@@ -72,8 +72,6 @@ def upload_file():
       <input type=file name=file>
       <input type=submit value=Upload>
     </form>
-    
-    <h1>Models: {str([elem.name for elem in models])}</h1>
     '''
 
 
