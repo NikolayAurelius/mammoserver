@@ -63,7 +63,7 @@ def upload_file():
 
             result['result'] = result['torch_model_2']
 
-            result['stranger'] = stranger(np.array([[1000 - result['cancer'], result['cancer']]]) / 1000)
+            result['stranger'] = stranger(np.array([[1000 - result['result'], result['result']]]) / 1000)
             return jsonify({'error': False, 'result': result})
         else:
             return jsonify({'error': True})
