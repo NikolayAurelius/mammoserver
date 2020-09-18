@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, flash, url_for, jsonify
-from models import model1, model2, model3, model4, bad, stranger
+from models import model_1, model_2, model_3, model_4, bad, stranger
 import os
 from datetime import datetime
 import numpy as np
@@ -18,7 +18,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 app = Flask(__name__)
-models = [model1, model2, model3, model4]
+models = [model_1, model_2, model_3, model_4]
 
 
 def allowed_file(filename):
