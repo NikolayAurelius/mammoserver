@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, flash, url_for, jsonify
-from models import cancer, bad, stranger
+from models import model1, model2, model3, model4, bad, stranger
 import os
 from datetime import datetime
 import numpy as np
@@ -18,6 +18,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 app = Flask(__name__)
+models = [model1, model2, model3, model4]
 
 
 def allowed_file(filename):
@@ -57,7 +58,10 @@ def upload_file():
 
             result = {'bad': bad(x)}
 
-            result['cancer'] = cancer(x) #int(model(x)[0][1].item() * 1000)
+            for model in models:
+                result[model.name] = int(model(x)[0][1].item() * 1000)
+
+            result['result'] = result['torch_model_2']
 
             result['stranger'] = stranger(np.array([[1000 - result['cancer'], result['cancer']]]) / 1000)
             return jsonify({'error': False, 'result': result})

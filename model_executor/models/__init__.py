@@ -118,9 +118,21 @@ class ModelSimplest(nn.Module):
         return self.out(self.head(x))
 
 
+model_1 = Model1().to(device=device)
+model_1.load_state_dict(torch.load(f'{WORKDIR}/torch_model_1.pt', map_location=torch.device('cpu')))
+model_1.eval()
+
 model_2 = Model2().to(device=device)
 model_2.load_state_dict(torch.load(f'{WORKDIR}/torch_model_2.pt', map_location=torch.device('cpu')))
 model_2.eval()
+
+model_3 = ModelSimple().to(device=device)
+model_3.load_state_dict(torch.load(f'{WORKDIR}/torch_model_3.pt', map_location=torch.device('cpu')))
+model_3.eval()
+
+model_4 = ModelSimplest().to(device=device)
+model_4.load_state_dict(torch.load(f'{WORKDIR}/torch_model_4.pt', map_location=torch.device('cpu')))
+model_4.eval()
 
 
 def g(value):
