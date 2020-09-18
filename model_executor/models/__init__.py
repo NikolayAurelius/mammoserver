@@ -127,7 +127,7 @@ class ModelSimplest(nn.Module):
         return self.out(self.head(x))
 
 
-model_2 = ModelSimplest().to(device=device)
+model_2 = Model2().to(device=device)
 model_2.load_state_dict(torch.load(f'{WORKDIR}/torch_model_2.pt', map_location=torch.device('cpu')))
 model_2.eval()
 
