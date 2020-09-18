@@ -59,7 +59,7 @@ def upload_file():
             result = {'bad': bad(x)}
 
             for model in models:
-                result[model.name] = int(model(x)[0][1].item() * 1000)
+                result[model.name] = int(model(x)[0].item() * 1000)
 
             result['result'] = result['torch_model_2']
 
