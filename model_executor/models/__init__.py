@@ -140,7 +140,7 @@ def g(value):
         value = 1.0
     elif value < -1.0:
         value = -1.0
-    value = int((value + 1.0) * 500)
+    value = int((value + 1.0) * 50)
     return value
 
 
