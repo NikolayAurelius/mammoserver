@@ -41,9 +41,6 @@ class Model1(nn.Module):
         return self.out(self.head(x))
 
 
-model_1 = Model1().cuda()
-
-
 class Model2(nn.Module):
     def __init__(self):
         super(Model2, self).__init__()
@@ -77,9 +74,6 @@ class Model2(nn.Module):
         return self.out(self.head(x))
 
 
-model_2 = Model2().cuda()
-
-
 class ModelSimple(nn.Module):
     def __init__(self):
         super(ModelSimple, self).__init__()
@@ -101,9 +95,6 @@ class ModelSimple(nn.Module):
 
     def forward(self, x):
         return self.out(self.head(x))
-
-
-model_3 = ModelSimple().cuda()
 
 
 class ModelSimplest(nn.Module):
