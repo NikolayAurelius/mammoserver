@@ -134,6 +134,78 @@ model_4 = ModelSimplest().to(device=device)
 model_4.load_state_dict(torch.load(f'{WORKDIR}/torch_model_4.pt', map_location=torch.device('cpu')))
 model_4.eval()
 
+###############
+from torch.nn.parameter import Parameter
+
+
+class BtchNormalization(nn.Module):
+
+    def __init__(self, num_features):
+        super(BtchNormalization, self).__init__()
+
+        self.num_features = num_features
+        self.weight = Parameter(torch.ones(num_features, dtype=torch.float32))
+        self.bias = Parameter(torch.zeros(num_features, dtype=torch.float32))
+        self.is_first_call = True
+
+    def forward(self, x):
+        if self.is_first_call:
+            self.dims = tuple(i for i in range(len(x.shape)) if i != 1)  # return all axis except 1
+            self.shp = tuple(1 if i != 1 else self.num_features for i in range(len(x.shape)))
+            self.weight = Parameter(self.weight.reshape(self.shp))
+            self.bias = Parameter(self.bias.reshape(self.shp))
+            self.is_first_call = False
+
+        x_mean = x.mean(dim=self.dims, keepdim=True)
+        x_var = x.var(dim=self.dims, keepdim=True, unbiased=False)
+        eps = 1e-5
+
+        x = torch.div(x - x_mean, torch.sqrt(x_var + eps))
+        return self.weight * x + self.bias
+
+class Model2BN(nn.Module):
+    def __init__(self):
+        super(Model2BN, self).__init__()
+        self.name = 'torch_model_2_bn'
+
+        self.head = nn.Sequential(
+            conv4d(1, 3, 4),
+            BtchNormalization(3),
+            nn.ReLU(inplace=True),
+            conv4d(3, 9, 4),
+            BtchNormalization(9),
+            nn.ReLU(inplace=True),
+            conv4d(9, 12, 4),
+            BtchNormalization(12),
+            nn.ReLU(inplace=True),
+            conv4d(12, 15, 4),
+            BtchNormalization(15),
+            nn.ReLU(inplace=True),
+            conv4d(15, 15, 3),
+            BtchNormalization(15),
+            nn.ReLU(inplace=True),
+
+
+        )
+
+        self.out = nn.Sequential(
+            nn.Flatten(),
+            # nn.Dropout(0.5),
+            nn.Linear(15 * ((18 - 14) ** 4), 100),
+            nn.ReLU(inplace=True),
+            nn.Linear(100, 1, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.out(self.head(x))
+
+
+model_2BN = Model2BN().to(device=device)
+model_2BN.load_state_dict(torch.load(f'{WORKDIR}/torch_model_2_bn_c.pt', map_location=torch.device('cpu')))
+model_2BN.eval()
+###################
+
 
 def g(value):
     if value > 1.0:

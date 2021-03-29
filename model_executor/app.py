@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, flash, url_for, jsonify
-from models import model_1, model_2, model_3, model_4, bad, stranger
+from models import model_1, model_2, model_3, model_4, bad, stranger, model_2BN
 import os
 from datetime import datetime
 import numpy as np
@@ -18,7 +18,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 app = Flask(__name__)
-models = [model_1, model_2, model_3, model_4]
+models = [model_1, model_2, model_3, model_4, model_2BN]
 
 
 def allowed_file(filename):
@@ -61,7 +61,7 @@ def upload_file():
             for model in models:
                 result[model.name] = int(model(x)[0].item() * 100)
 
-            result['stranger'] = stranger(np.array([[100 - result['torch_model_2'], result['torch_model_2']]]) / 100)
+            result['stranger'] = stranger(np.array([[100 - result['torch_model_2_bn'], result['torch_model_2_bn']]]) / 100)
 
             def ans(value, names):
                 if value >= 0.5:
@@ -69,7 +69,7 @@ def upload_file():
                 else:
                     return names[1]
 
-            result['result'] = f"{result['torch_model_2']}, " \
+            result['result'] = f"{result['torch_model_2_bn']}, " \
                                f"{ans(result['bad'], ['bad', 'good'])}, " \
                                f"{ans(result['stranger'], ['new', 'old'])}"
             return jsonify({'error': False, 'result': result})
